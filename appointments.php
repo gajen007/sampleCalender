@@ -1,6 +1,6 @@
 <html>
 <head>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 </head>
 <body>
 <?php
@@ -39,16 +39,15 @@
 	</div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+<script src="jquery/jquery-3.7.0.min.js"></script>
+<script src="bootstrap/js/bootstrap.bundle.min.js"></script>
 <script type="text/javascript">
   function addZeroForMonthNumber(str){
     if (str.length==1) { return "0"+str; }
     else{ return str; }
   }
 
-  $(document).ready(function(){
-    
+  function showCalender(){
     fetch("http://localhost/aravin/backend.php?clickedYear="+<?php echo $chosenYear; ?>+"&clickedMonth="+<?php echo $chosenMonth; ?>+"",{
           method:'GET',
           mode: 'no-cors',
@@ -115,48 +114,39 @@
           console.log(e);
           alert("Exception; check console!");
         });
-    
-  });
+  }
 
-//Derive Time table////////////////////////////////////////////////Will change this when Aravin gave his database table////////////////////////////////////////////////////////////////////////////
-/*
-$.ajax({
-     type: "GET",
-     url: "",
-     data: { chosenYear:"<?php /* echo $chosenYear; */ ?>", chosenMonth:"<?php /*echo $chosenMonth;*/ ?>" },
-     cache: false,
-     success: function(res3){
-      listedModules = [];
-      if (!res3.result) {
-       res3.forEach(function(item){
-        $("#ongoingModule").each(function() {
-          if (!listedModules.includes(item.courseid)) {
-            $("#ongoingModule").append("<option value='"+item.courseid+"'>"+item.coursetitle+"</option>")
-            listedModules.push(item.courseid);
+  function deriveAppointments(){
+    fetch("http://localhost/aravin/backend.php?lookupMonth="+<?php echo $chosenMonth; ?>+"&lookupYear="+<?php echo $chosenYear; ?>+"&employeeID=3",{
+          method:'GET',
+          mode: 'no-cors',
+          cache: 'no-cache'})
+        .then(response => {
+          if (response.status == 200) {
+            return response.json();            
           }
+          else {
+            alert('Backend Error..!');
+            console.log(response);
+          }
+        })
+        .then(data => {
+          data.forEach(function(a){
+            var j=a.appDate;
+            var dateAsString=j.substring(8,j.length);
+            $("#day_"+dateAsString).append("<button class='btn btn-sm border-dark' style='margin:0.5%; font-size:12px !important' data-toggle='tooltip' title='"+a.customerName+"'>"+a.customerName+"<br><strong>"+a.StartTime+"-"+a.EndTime+"</strong><br></button><br>");
+          });
+        })
+        .catch((e) => {
+          console.log(e);
+          alert("Exception; check console!");
         });
+  }
 
-        var j=item.scheduleDate;
-        var dateAsString=j.substring(8,j.length);
-        if (item.recordingLink!=null) {
-          $("#day_"+dateAsString).append("<button id='goToSession_"+item.sessionid+"' class='btn btn-sm border-dark goToSession module_"+item.courseid+"' style='margin:0.5%; font-size:12px !important' data-toggle='tooltip' title='"+item.coursetitle+"'>"+item.coursetitle+"<br>by <strong>"+item.trfname+"</strong><br>"+item.startedOn+"-"+item.endedOn+"&nbsp;<i style='color:blue' class='fab fa-youtube'></i></button><br>");
-        }
-        else{
-          $("#day_"+dateAsString).append("<button id='goToSession_"+item.sessionid+"' class='btn btn-sm border-dark goToSession module_"+item.courseid+"' style='margin:0.5%; font-size:12px !important' data-toggle='tooltip' title='"+item.coursetitle+"'>"+item.coursetitle+"<br>by <strong>"+item.trfname+"</strong><br>"+item.startedOn+"-"+item.endedOn+"</button><br>");
-        }
-      });
-
-
-      $(".goToSession").each(function(){
-      });
-       
-     }
-     else{ alert(res3.message); }
-   },
-   error: function(res4){ alert("Failed to show users..."); console.log(res4.responseText); }
- });
-*/
-
+  $(document).ready(function(){
+    showCalender();
+    deriveAppointments();
+  });
 </script>
 </body>
 </html>
